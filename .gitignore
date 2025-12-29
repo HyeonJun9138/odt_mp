@@ -1,0 +1,7 @@
+# Large data files
+/resources/dem/
+/resources/korea.mbtiles
+
+# git rm --cached -r resources/dem
+# git rm --cached resources/korea.mbtiles
+# git status

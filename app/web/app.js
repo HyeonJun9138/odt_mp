@@ -1,5 +1,13 @@
 (() => {
   const body = document.body;
+  const demConfig = {
+    tileUrl: "/dem/{z}/{x}/{y}.png",
+    tileSize: 256,
+    maxZoom: 12,
+    encoding: "terrarium",
+    exaggeration: 0.6,
+    pitchThreshold: 8,
+  };
   const config = {
     tileUrl: body.dataset.tileUrl,
     minZoom: Number(body.dataset.minZoom),
@@ -7,6 +15,7 @@
     center: [Number(body.dataset.centerLon), Number(body.dataset.centerLat)],
     startZoom: Number(body.dataset.startZoom),
     bounds: body.dataset.bounds ? JSON.parse(body.dataset.bounds) : null,
+    dem: demConfig,
   };
 
   class MapApp {
@@ -21,6 +30,7 @@
         vertiport: document.getElementById("vertiport-panel"),
       };
       this.currentTheme = "light";
+      this.terrainEnabled = false;
     }
 
     init() {
@@ -30,6 +40,7 @@
       this.bindCloseButtons();
       this.applyTheme(this.currentTheme);
       this.setupScaleObserver();
+      this.setupTerrainToggle();
     }
 
     createMap() {
@@ -63,6 +74,13 @@
             tiles: [this.config.tileUrl],
             minzoom: this.config.minZoom,
             maxzoom: this.config.maxZoom,
+          },
+          dem: {
+            type: "raster-dem",
+            tiles: [this.config.dem.tileUrl],
+            tileSize: this.config.dem.tileSize,
+            maxzoom: this.config.dem.maxZoom,
+            encoding: this.config.dem.encoding,
           },
         },
         layers: [
@@ -215,6 +233,31 @@
       this.mapContainer.classList.toggle("theme-dark", isDark);
       this.themeButtons.forEach((button) => {
         button.classList.toggle("is-active", button.dataset.theme === theme);
+      });
+    }
+
+    setupTerrainToggle() {
+      const updateTerrain = () => {
+        const shouldEnable = this.map.getPitch() >= this.config.dem.pitchThreshold;
+        if (shouldEnable === this.terrainEnabled) {
+          return;
+        }
+        if (shouldEnable) {
+          if (this.map.getSource("dem")) {
+            this.map.setTerrain({
+              source: "dem",
+              exaggeration: this.config.dem.exaggeration,
+            });
+          }
+        } else {
+          this.map.setTerrain(null);
+        }
+        this.terrainEnabled = shouldEnable;
+      };
+
+      this.map.on("load", () => {
+        updateTerrain();
+        this.map.on("pitch", updateTerrain);
       });
     }
 

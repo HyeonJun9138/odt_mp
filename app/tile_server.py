@@ -11,7 +11,16 @@ import threading
 from typing import Optional
 from urllib.parse import urlparse
 
-from app.config import DEFAULT_CENTER_LAT, DEFAULT_CENTER_LON, DEFAULT_START_ZOOM, USE_BOUNDS
+from app.config import (
+    DEFAULT_CENTER_LAT,
+    DEFAULT_CENTER_LON,
+    DEFAULT_START_ZOOM,
+    DEM_DIR,
+    DEM_MAX_ZOOM,
+    DEM_TILE_SIZE,
+    USE_BOUNDS,
+)
+from app.dem import load_dem_provider
 from app.mbtiles import MBTiles
 
 
@@ -20,12 +29,18 @@ class TileHTTPServer(ThreadingMixIn, HTTPServer):
     allow_reuse_address = True
 
     def __init__(
-        self, server_address: tuple[str, int], mbtiles: MBTiles, web_dir: Path, resources_dir: Path
+        self,
+        server_address: tuple[str, int],
+        mbtiles: MBTiles,
+        web_dir: Path,
+        resources_dir: Path,
+        dem_provider: Optional[object],
     ):
         super().__init__(server_address, TileRequestHandler)
         self.mbtiles = mbtiles
         self.web_dir = Path(web_dir)
         self.resources_dir = Path(resources_dir)
+        self.dem_provider = dem_provider
 
     def tile_url(self) -> str:
         host, port = self.server_address
@@ -37,7 +52,12 @@ class TileServer:
     def __init__(
         self, mbtiles: MBTiles, web_dir: Path, resources_dir: Path, host: str, port: int
     ) -> None:
-        self._server = TileHTTPServer((host, port), mbtiles, web_dir, resources_dir)
+        dem_provider = None
+        if DEM_DIR.exists():
+            candidate = load_dem_provider(DEM_DIR, tile_size=DEM_TILE_SIZE, max_zoom=DEM_MAX_ZOOM)
+            if candidate.available:
+                dem_provider = candidate
+        self._server = TileHTTPServer((host, port), mbtiles, web_dir, resources_dir, dem_provider)
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
 
     @property
@@ -66,6 +86,9 @@ class TileRequestHandler(BaseHTTPRequestHandler):
             return
         if path.startswith("/tiles/"):
             self._serve_tile(path)
+            return
+        if path.startswith("/dem/"):
+            self._serve_dem(path)
             return
         if path.startswith("/resources/"):
             self._serve_resource(path)
@@ -124,6 +147,29 @@ class TileRequestHandler(BaseHTTPRequestHandler):
         if self.server.mbtiles.info.tile_format == "pbf" and data[:2] == b"\x1f\x8b":
             encoding = "gzip"
         self._send_bytes(HTTPStatus.OK, data, content_type, encoding=encoding)
+
+    def _serve_dem(self, path: str) -> None:
+        provider = self.server.dem_provider
+        if provider is None:
+            self._send_text(HTTPStatus.NOT_FOUND, "DEM unavailable")
+            return
+        parts = path.split("/")
+        if len(parts) < 5:
+            self._send_text(HTTPStatus.NOT_FOUND, "Invalid DEM tile path")
+            return
+        try:
+            z = int(parts[2])
+            x = int(parts[3])
+            y_str, _ext = os.path.splitext(parts[4])
+            y = int(y_str)
+        except ValueError:
+            self._send_text(HTTPStatus.BAD_REQUEST, "Invalid DEM tile coordinates")
+            return
+        data = provider.get_tile(z, x, y)
+        if data is None:
+            self._send_text(HTTPStatus.NOT_FOUND, "DEM tile not found")
+            return
+        self._send_bytes(HTTPStatus.OK, data, "image/png")
 
     def _serve_static(self, path: str) -> None:
         file_path = _safe_join(self.server.web_dir, path)
