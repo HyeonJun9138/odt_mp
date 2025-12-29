@@ -15,6 +15,7 @@ from app.config import (
     DEFAULT_CENTER_LAT,
     DEFAULT_CENTER_LON,
     DEFAULT_START_ZOOM,
+    DATA_DIR,
     DEM_DIR,
     DEM_MAX_ZOOM,
     DEM_TILE_SIZE,
@@ -34,12 +35,14 @@ class TileHTTPServer(ThreadingMixIn, HTTPServer):
         mbtiles: MBTiles,
         web_dir: Path,
         resources_dir: Path,
+        data_dir: Path,
         dem_provider: Optional[object],
     ):
         super().__init__(server_address, TileRequestHandler)
         self.mbtiles = mbtiles
         self.web_dir = Path(web_dir)
         self.resources_dir = Path(resources_dir)
+        self.data_dir = Path(data_dir)
         self.dem_provider = dem_provider
 
     def tile_url(self) -> str:
@@ -57,7 +60,14 @@ class TileServer:
             candidate = load_dem_provider(DEM_DIR, tile_size=DEM_TILE_SIZE, max_zoom=DEM_MAX_ZOOM)
             if candidate.available:
                 dem_provider = candidate
-        self._server = TileHTTPServer((host, port), mbtiles, web_dir, resources_dir, dem_provider)
+        self._server = TileHTTPServer(
+            (host, port),
+            mbtiles,
+            web_dir,
+            resources_dir,
+            DATA_DIR,
+            dem_provider,
+        )
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
 
     @property
@@ -92,6 +102,9 @@ class TileRequestHandler(BaseHTTPRequestHandler):
             return
         if path.startswith("/resources/"):
             self._serve_resource(path)
+            return
+        if path.startswith("/data/"):
+            self._serve_data(path)
             return
         self._serve_static(path)
 
@@ -183,6 +196,16 @@ class TileRequestHandler(BaseHTTPRequestHandler):
     def _serve_resource(self, path: str) -> None:
         resource_path = path[len("/resources/") :]
         file_path = _safe_join(self.server.resources_dir, resource_path)
+        if file_path is None or not file_path.is_file():
+            self._send_text(HTTPStatus.NOT_FOUND, "Not found")
+            return
+        mime, _ = mimetypes.guess_type(file_path)
+        content_type = mime or "application/octet-stream"
+        self._send_bytes(HTTPStatus.OK, file_path.read_bytes(), content_type)
+
+    def _serve_data(self, path: str) -> None:
+        data_path = path[len("/data/") :]
+        file_path = _safe_join(self.server.data_dir, data_path)
         if file_path is None or not file_path.is_file():
             self._send_text(HTTPStatus.NOT_FOUND, "Not found")
             return

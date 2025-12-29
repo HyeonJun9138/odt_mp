@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MBTiles Viewer</title>
+    <title>ODT SVMP</title>
     <link rel="stylesheet" href="vendor/maplibre-gl.css" />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -15,6 +15,8 @@
     data-center-lon="__CENTER_LON__"
     data-start-zoom="__START_ZOOM__"
     data-bounds='__BOUNDS_JSON__'
+    data-vertiport-csv="/data/vertiport_default.csv"
+    data-waypoint-csv="/data/waypoint_default.csv"
   >
     <div id="app">
       <div id="map"></div>
@@ -36,15 +38,25 @@
         >
           <img src="/resources/path_sign.png" alt="Corridor" />
         </button>
-        <button type="button" class="ui-btn" data-action="plan" title="Flight plan">
-          B3
+        <button
+          type="button"
+          class="ui-btn ui-btn-icon"
+          data-action="plan"
+          title="Flight plan"
+        >
+          <img src="/resources/plan_sign.png" alt="Flight plan" />
         </button>
-        <button type="button" class="ui-btn" data-action="settings" title="Settings">
-          B4
+        <button
+          type="button"
+          class="ui-btn ui-btn-icon"
+          data-action="settings"
+          title="Settings"
+        >
+          <img src="/resources/setting_sign.png" alt="Settings" />
         </button>
       </div>
 
-      <div id="vertiport-panel" class="panel-window" aria-hidden="true">
+      <div id="vertiport-panel" class="panel-window panel-window-vertiport" aria-hidden="true">
         <div class="panel-header">
           <span class="panel-title">Vertiport</span>
           <button type="button" class="panel-close" data-action="close-vertiport">X</button>
@@ -52,126 +64,153 @@
         <div class="panel-body">
           <div class="panel-row">
             <span class="panel-label">file</span>
-            <input class="panel-input" type="text" value="Sample_vertiport.csv" readonly />
+            <input class="panel-input" type="text" value="vertiport_default.csv" readonly />
           </div>
           <div class="panel-row panel-actions">
             <button type="button" class="panel-action-btn">Open file</button>
             <button type="button" class="panel-action-btn">Reset</button>
           </div>
           <div class="table-wrap">
-            <table class="data-table">
+            <table class="data-table data-table-vertiport">
               <thead>
                 <tr>
                   <th>Num</th>
                   <th>Name</th>
                   <th>longitude</th>
                   <th>latitude</th>
-                  <th>Altitude</th>
                   <th>Type</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>1</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>4</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>6</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>7</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>8</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>9</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>10</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>11</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>12</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
+              <tbody id="vertiport-table-body"></tbody>
             </table>
           </div>
           <div class="panel-footer">
             <div class="panel-placeholder">버튼 할당 TBD</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="corridor-panel" class="panel-window panel-window-corridor" aria-hidden="true">
+        <div class="panel-header">
+          <span class="panel-title">Corridor</span>
+          <button type="button" class="panel-close" data-action="close-corridor">X</button>
+        </div>
+        <div class="panel-body">
+          <div class="panel-row">
+            <span class="panel-label">file</span>
+            <input class="panel-input" type="text" value="waypoint_default.csv" readonly />
+          </div>
+          <div class="panel-row panel-actions">
+            <button type="button" class="panel-action-btn">Open file</button>
+            <button type="button" class="panel-action-btn">Reset</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table data-table-corridor">
+              <thead>
+                <tr>
+                  <th>Num</th>
+                  <th>Name</th>
+                  <th>longitude</th>
+                  <th>latitude</th>
+                  <th>Altitude(m)</th>
+                  <th>Link</th>
+                </tr>
+              </thead>
+              <tbody id="corridor-table-body"></tbody>
+            </table>
+          </div>
+          <div class="panel-footer">
+            <div class="panel-placeholder">버튼 할당 TBD</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="plan-panel" class="panel-window panel-window-plan" aria-hidden="true">
+        <div class="panel-header">
+          <span class="panel-title">Flight Plan</span>
+          <button type="button" class="panel-close" data-action="close-plan">X</button>
+        </div>
+        <div class="panel-body panel-body-plan">
+          <div class="plan-controls">
+            <button type="button" class="plan-btn">Select V&amp;P</button>
+            <button type="button" class="plan-btn">Reset</button>
+            <button type="button" class="plan-btn">Apply</button>
+          </div>
+          <div class="plan-chart">
+            <div class="plan-axis">
+              <span class="plan-axis-label plan-axis-label-2000">2000ft</span>
+              <span class="plan-axis-label plan-axis-label-1000">1000ft</span>
+              <span class="plan-axis-label plan-axis-label-50">50ft</span>
+            </div>
+            <div class="plan-plot">
+              <svg class="plan-plot-svg" viewBox="0 0 520 120" preserveAspectRatio="none">
+                <line x1="0" y1="10" x2="0" y2="96" stroke="#2b2b2b" stroke-width="1" />
+                <line x1="0" y1="96" x2="520" y2="96" stroke="#2b2b2b" stroke-width="1" />
+                <line
+                  x1="0"
+                  y1="22"
+                  x2="520"
+                  y2="22"
+                  stroke="#c9c9c9"
+                  stroke-dasharray="4 4"
+                />
+                <line
+                  x1="0"
+                  y1="50"
+                  x2="520"
+                  y2="50"
+                  stroke="#c9c9c9"
+                  stroke-dasharray="4 4"
+                />
+                <line
+                  x1="0"
+                  y1="78"
+                  x2="520"
+                  y2="78"
+                  stroke="#c9c9c9"
+                  stroke-dasharray="4 4"
+                />
+                <line x1="40" y1="96" x2="40" y2="78" stroke="#1e8fd6" stroke-width="2" />
+                <line x1="480" y1="96" x2="480" y2="78" stroke="#1e8fd6" stroke-width="2" />
+                <polyline
+                  points="40,78 90,50 430,50 480,78"
+                  fill="none"
+                  stroke="#1e8fd6"
+                  stroke-width="2"
+                  stroke-linejoin="round"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <div class="plan-point plan-point-start">
+                <img src="/resources/vertiport_sign.png" alt="Departure" />
+              </div>
+              <div class="plan-point plan-point-end">
+                <img src="/resources/vertiport_sign.png" alt="Arrival" />
+              </div>
+              <div class="plan-caption plan-caption-start">Departure</div>
+              <div class="plan-caption plan-caption-end">Arrival</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="settings-panel" class="panel-window panel-window-settings" aria-hidden="true">
+        <div class="panel-header">
+          <span class="panel-title">Setting</span>
+          <button type="button" class="panel-close" data-action="close-settings">X</button>
+        </div>
+        <div class="panel-body panel-body-settings">
+          <div class="panel-row">
+            <span class="panel-label">IP</span>
+            <input class="panel-input" type="text" value="192.0.0.1" readonly />
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Port</span>
+            <input class="panel-input" type="text" value="4561" readonly />
+          </div>
+          <div class="panel-row panel-actions">
+            <button type="button" class="panel-action-btn">Apply</button>
+            <button type="button" class="panel-action-btn">Reset</button>
           </div>
         </div>
       </div>
