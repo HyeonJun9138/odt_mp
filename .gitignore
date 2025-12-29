@@ -1,5 +1,6 @@
 # Large data files
 /resources/dem/
+/resources/reference/plugins
 /resources/korea.mbtiles
 
 # git rm --cached -r resources/dem
