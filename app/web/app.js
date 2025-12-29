@@ -5,8 +5,12 @@
     tileSize: 256,
     maxZoom: 12,
     encoding: "terrarium",
-    exaggeration: 0.6,
-    pitchThreshold: 8,
+    exaggeration: 1.0,
+    pitchThreshold: 2,
+  };
+  const viewConfig = {
+    maxZoomBuffer: 2,
+    maxPitch: 85,
   };
   const config = {
     tileUrl: body.dataset.tileUrl,
@@ -16,6 +20,7 @@
     startZoom: Number(body.dataset.startZoom),
     bounds: body.dataset.bounds ? JSON.parse(body.dataset.bounds) : null,
     dem: demConfig,
+    view: viewConfig,
   };
 
   class MapApp {
@@ -51,7 +56,8 @@
         center: this.config.center,
         zoom: this.config.startZoom,
         minZoom: this.config.minZoom,
-        maxZoom: this.config.maxZoom,
+        maxZoom: this.config.maxZoom + this.config.view.maxZoomBuffer,
+        maxPitch: this.config.view.maxPitch,
         attributionControl: false,
       });
 

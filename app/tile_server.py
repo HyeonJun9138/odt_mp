@@ -202,7 +202,10 @@ class TileRequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Encoding", encoding)
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            return
 
 
 def _safe_join(base_dir: Path, request_path: str) -> Optional[Path]:
