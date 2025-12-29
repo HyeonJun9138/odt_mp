@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MBTiles Viewer</title>
+    <link rel="stylesheet" href="vendor/maplibre-gl.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body
+    data-tile-url="__TILE_URL__"
+    data-min-zoom="__MIN_ZOOM__"
+    data-max-zoom="__MAX_ZOOM__"
+    data-center-lat="__CENTER_LAT__"
+    data-center-lon="__CENTER_LON__"
+    data-start-zoom="__START_ZOOM__"
+    data-bounds='__BOUNDS_JSON__'
+  >
+    <div id="app">
+      <div id="map"></div>
+
+      <div id="left-controls" class="panel panel-left">
+        <button
+          type="button"
+          class="ui-btn ui-btn-icon"
+          data-action="vertiport"
+          title="Vertiport info"
+        >
+          <img src="/resources/v_sign.png" alt="Vertiport" />
+        </button>
+        <button type="button" class="ui-btn" data-action="corridor" title="Corridor view">
+          B2
+        </button>
+        <button type="button" class="ui-btn" data-action="plan" title="Flight plan">
+          B3
+        </button>
+        <button type="button" class="ui-btn" data-action="settings" title="Settings">
+          B4
+        </button>
+      </div>
+
+      <div id="vertiport-panel" class="panel-window" aria-hidden="true">
+        <div class="panel-header">
+          <span class="panel-title">Vertiport</span>
+          <button type="button" class="panel-close" data-action="close-vertiport">X</button>
+        </div>
+        <div class="panel-body">
+          <div class="panel-row">
+            <span class="panel-label">file</span>
+            <input class="panel-input" type="text" value="Sample_vertiport.csv" readonly />
+          </div>
+          <div class="panel-row panel-actions">
+            <button type="button" class="panel-action-btn">Open file</button>
+            <button type="button" class="panel-action-btn">Reset</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Num</th>
+                  <th>Name</th>
+                  <th>longitude</th>
+                  <th>latitude</th>
+                  <th>Altitude</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>11</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel-footer">
+            <div class="panel-placeholder">버튼 할당 TBD</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="theme-controls" class="panel panel-right">
+        <button type="button" class="theme-card is-active" data-theme="light">
+          <span class="thumb">
+            <img src="/resources/white_ex_map.png" alt="White map preview" />
+          </span>
+          <span class="label">White</span>
+        </button>
+        <button type="button" class="theme-card" data-theme="dark">
+          <span class="thumb">
+            <img src="/resources/dark_ex_map.png" alt="Dark map preview" />
+          </span>
+          <span class="label">Dark</span>
+        </button>
+      </div>
+    </div>
+
+    <script src="vendor/maplibre-gl.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
