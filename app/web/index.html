@@ -56,6 +56,27 @@
         </button>
       </div>
 
+      <div id="bottom-controls" class="panel panel-bottom-left">
+        <button
+          id="playback-toggle"
+          type="button"
+          class="ui-btn ui-btn-icon"
+          data-action="playback"
+          title="Playback"
+        >
+          <img src="/resources/simulation_sign.png" alt="Simulation" />
+        </button>
+        <div id="playback-panel" class="playback-panel" aria-hidden="true">
+          <button type="button" class="playback-btn playback-btn-play" title="Play"></button>
+          <button type="button" class="playback-btn playback-btn-speed" title="Speed">
+            <span class="playback-speed-icon"></span>
+            <span class="playback-speed-text">1x</span>
+          </button>
+          <button type="button" class="playback-btn playback-btn-pause" title="Pause"></button>
+          <button type="button" class="playback-btn playback-btn-stop" title="Stop"></button>
+        </div>
+      </div>
+
       <div id="vertiport-panel" class="panel-window panel-window-vertiport" aria-hidden="true">
         <div class="panel-header">
           <span class="panel-title">Vertiport</span>
@@ -64,11 +85,21 @@
         <div class="panel-body">
           <div class="panel-row">
             <span class="panel-label">file</span>
-            <input class="panel-input" type="text" value="vertiport_default.csv" readonly />
+            <input
+              id="vertiport-file-name"
+              class="panel-input"
+              type="text"
+              value="vertiport_default.csv"
+              readonly
+            />
           </div>
           <div class="panel-row panel-actions">
-            <button type="button" class="panel-action-btn">Open file</button>
-            <button type="button" class="panel-action-btn">Reset</button>
+            <button type="button" class="panel-action-btn" data-action="open-vertiport">
+              Open file
+            </button>
+            <button type="button" class="panel-action-btn" data-action="reset-vertiport">
+              Reset
+            </button>
           </div>
           <div class="table-wrap">
             <table class="data-table data-table-vertiport">
@@ -98,11 +129,21 @@
         <div class="panel-body">
           <div class="panel-row">
             <span class="panel-label">file</span>
-            <input class="panel-input" type="text" value="waypoint_default.csv" readonly />
+            <input
+              id="corridor-file-name"
+              class="panel-input"
+              type="text"
+              value="waypoint_default.csv"
+              readonly
+            />
           </div>
           <div class="panel-row panel-actions">
-            <button type="button" class="panel-action-btn">Open file</button>
-            <button type="button" class="panel-action-btn">Reset</button>
+            <button type="button" class="panel-action-btn" data-action="open-corridor">
+              Open file
+            </button>
+            <button type="button" class="panel-action-btn" data-action="reset-corridor">
+              Reset
+            </button>
           </div>
           <div class="table-wrap">
             <table class="data-table data-table-corridor">
